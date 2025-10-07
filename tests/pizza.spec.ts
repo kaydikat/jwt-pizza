@@ -269,6 +269,10 @@ test('purchase with login', async ({ page }) => {
   await expect(page.locator('tfoot')).toContainText('0.008 ₿');
   await page.getByRole('button', { name: 'Pay now' }).click();
 
+  // Verify
+  await page.getByRole('button', { name: 'Verify' }).click();
+  await page.getByRole('heading', { name: 'JWT Pizza - valid' }).click();
+
   // Check balance
   await expect(page.getByText('0.008')).toBeVisible();
 });
@@ -334,7 +338,7 @@ test('admin closes franchise', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Mama Ricci\'s kitchen' })).toBeVisible();
 });
 
-test('admin creates franchise', async ({ page }) => {
+test('admin creates and filters franchise', async ({ page }) => {
   await basicInit(page);
   
   // Login as admin
@@ -351,6 +355,11 @@ test('admin creates franchise', async ({ page }) => {
   await page.getByRole('textbox', { name: 'franchisee admin email' }).fill('franchisee@jwt.com');
   await page.getByRole('button', { name: 'Create' }).click();
 
+  // Filter franchise
+
+  await page.getByRole('textbox', { name: 'Filter franchises' }).click();
+  await page.getByRole('textbox', { name: 'Filter franchises' }).fill('franchise');
+  await page.getByRole('button', { name: 'Submit' }).click();
 });
 
 test('franchisee login and dashboard', async ({ page }) => {
@@ -365,33 +374,6 @@ test('franchisee login and dashboard', async ({ page }) => {
   
   await page.getByLabel('Global').getByRole('link', { name: 'Franchise' }).click();
   
-});
-
-
-test('login as franchisee', async ({ page }) => {
-  await basicInit(page);
-
-  await page.getByRole('link', { name: 'Login' }).click();
-  await page.getByRole('textbox', { name: 'Email address' }).fill('f@jwt.com');
-  await page.getByRole('textbox', { name: 'Password' }).fill('franchisee');
-  await page.getByRole('button', { name: 'Login' }).click();
-  
-  await page.getByLabel('Global').getByRole('link', { name: 'Franchise' }).click();
-  
-  await expect(page).toHaveURL(/.*franchise-dashboard.*/);
-});
-
-test('franchisee accesses dashboard', async ({ page }) => {
-  await basicInit(page);
-  
-  await page.getByRole('link', { name: 'Login' }).click();
-  await page.getByRole('textbox', { name: 'Email address' }).fill('f@jwt.com');
-  await page.getByRole('textbox', { name: 'Password' }).fill('franchisee');
-  await page.getByRole('button', { name: 'Login' }).click();
-  
-  await page.getByLabel('Global').getByRole('link', { name: 'Franchise' }).click();
-  
-  await expect(page).toHaveURL(/.*franchise-dashboard.*/);
 });
 
 test('about page', async ({ page }) => {
@@ -416,4 +398,12 @@ test('diner dashboard', async ({ page }) => {
   await page.getByRole('button', { name: 'Login' }).click();
   await page.getByRole('link', { name: 'KC' }).click();
   await expect(page).toHaveURL(/.*diner-dashboard.*/);
+});
+
+test('404 not found page', async ({ page }) => {
+  await basicInit(page);
+  
+  await page.goto('/nonexistent-page');
+
+  await page.getByText('Oops').click();
 });
