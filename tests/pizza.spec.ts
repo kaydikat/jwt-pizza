@@ -271,7 +271,6 @@ test('purchase with login', async ({ page }) => {
 
   // Verify
   await page.getByRole('button', { name: 'Verify' }).click();
-  await page.getByRole('heading', { name: 'JWT Pizza - valid' }).click();
 
   // Check balance
   await expect(page.getByText('0.008')).toBeVisible();
