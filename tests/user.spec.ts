@@ -1,4 +1,5 @@
 import { test, expect } from "playwright-test-coverage";
+import { basicInit } from "./pizza.spec";
 
 test("updateUserName", async ({ page }) => {
   const email = `user${Math.floor(Math.random() * 10000)}@jwt.com`;
