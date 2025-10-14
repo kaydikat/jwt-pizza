@@ -2,6 +2,7 @@ import { test, expect } from "playwright-test-coverage";
 import { basicInit } from "./test-utils";
 
 test("updateUserName", async ({ page }) => {
+  await basicInit(page);
   const email = `user${Math.floor(Math.random() * 10000)}@jwt.com`;
   await page.goto("/");
   await page.getByRole("link", { name: "Register" }).click();
@@ -18,7 +19,7 @@ test("updateUserName", async ({ page }) => {
   await expect(page.locator("h3")).toContainText("Edit user");
   await page.getByRole("button", { name: "Update" }).click();
 
-  await expect(page.getByRole("button", { name: "Edit" })).toBeVisible();
+  await page.waitForSelector('[role="dialog"].hidden', { state: "attached" });
 
   await expect(page.getByRole("main")).toContainText("pizza diner");
 
@@ -27,7 +28,7 @@ test("updateUserName", async ({ page }) => {
   await page.getByRole("textbox").first().fill("pizza dinerx");
   await page.getByRole("button", { name: "Update" }).click();
 
-  await expect(page.getByRole("button", { name: "Edit" })).toBeVisible();
+  await page.waitForSelector('[role="dialog"].hidden', { state: "attached" });
 
   await expect(page.getByRole("main")).toContainText("pizza dinerx");
 
@@ -44,6 +45,8 @@ test("updateUserName", async ({ page }) => {
 });
 
 test("updateUser email and password", async ({ page }) => {
+  await basicInit(page);
+
   const email = `user${Math.floor(Math.random() * 10000)}@jwt.com`;
   await page.goto("/");
   await page.getByRole("link", { name: "Register" }).click();
@@ -60,7 +63,7 @@ test("updateUser email and password", async ({ page }) => {
   await expect(page.locator("h3")).toContainText("Edit user");
   await page.getByRole("button", { name: "Update" }).click();
 
-  await expect(page.getByRole("button", { name: "Edit" })).toBeVisible();
+  await page.waitForSelector('[role="dialog"].hidden', { state: "attached" });
 
   await expect(page.getByRole("main")).toContainText("pizza diner");
 
@@ -72,7 +75,7 @@ test("updateUser email and password", async ({ page }) => {
   await page.locator("#password").fill("newpassword");
   await page.getByRole("button", { name: "Update" }).click();
 
-  await expect(page.getByRole("button", { name: "Edit" })).toBeVisible();
+  await page.waitForSelector('[role="dialog"].hidden', { state: "attached" });
 
   await expect(page.getByRole("main")).toContainText("pizza diner");
 
@@ -85,7 +88,6 @@ test("updateUser email and password", async ({ page }) => {
   await page.getByRole("textbox", { name: "Password" }).fill("newpassword");
   await page.getByRole("button", { name: "Login" }).click();
 
-  await expect(page.getByRole("link", { name: "pd" })).toBeVisible();
   await page.getByRole("link", { name: "pd" }).click();
 
   await expect(page.getByRole("main")).toContainText("pizza diner");
