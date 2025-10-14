@@ -325,5 +325,47 @@ export async function basicInit(page: Page) {
     }
   });
 
+  // add users to user list
+  await page.route(/\/api\/user(\?.*)?$/, async (route) => {
+    const method = route.request().method();
+    if (method === "GET") {
+      // Extract query parameters
+      const url = new URL(route.request().url());
+      const page = parseInt(url.searchParams.get("page") || "0");
+      const limit = parseInt(url.searchParams.get("limit") || "10");
+      const name = url.searchParams.get("name") || "*";
+
+      // Get all users from validUsers
+      let users = Object.values(validUsers);
+
+      // Filter users by name if provided (supporting wildcard *)
+      if (name !== "*") {
+        const regex = new RegExp(name.replace(/\*/g, ".*"), "i");
+        users = users.filter((user) => regex.test(user.name));
+      }
+
+      // Apply pagination
+      const start = page * limit;
+      const end = start + limit;
+      const paginatedUsers = users.slice(start, end);
+
+      // Prepare response
+      const response = {
+        users: paginatedUsers.map((user) => ({
+          ...user,
+          password: undefined,
+        })),
+        more: end < users.length,
+      };
+
+      await route.fulfill({ json: response });
+    } else {
+      await route.fulfill({
+        status: 405,
+        json: { error: "Method Not Allowed" },
+      });
+    }
+  });
+
   await page.goto("/");
 }

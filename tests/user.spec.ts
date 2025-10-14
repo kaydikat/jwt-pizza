@@ -131,9 +131,7 @@ test("updateFranchisee", async ({ page }) => {
   await basicInit(page);
 
   await page.getByRole("link", { name: "Login" }).click();
-  await page
-    .getByRole("textbox", { name: "Email address" })
-    .fill("f@jwt.com");
+  await page.getByRole("textbox", { name: "Email address" }).fill("f@jwt.com");
   await page.getByRole("textbox", { name: "Password" }).fill("franchisee");
   await page.getByRole("button", { name: "Login" }).click();
 
@@ -160,4 +158,39 @@ test("updateFranchisee", async ({ page }) => {
 
   await page.getByRole("link", { name: "FU" }).click();
   await expect(page.getByRole("main")).toContainText("Franchisee Userx");
+});
+
+test("admin checks if user list has users, deletes, and filters", async ({
+  page,
+}) => {
+  await basicInit(page);
+
+  // Login as admin
+  await page.getByRole("link", { name: "Login" }).click();
+  await page
+    .getByRole("textbox", { name: "Email address" })
+    .fill("admin@jwt.com");
+  await page.getByRole("textbox", { name: "Password" }).fill("admin");
+  await page.getByRole("button", { name: "Login" }).click();
+
+  await page.getByRole("link", { name: "Admin" }).click();
+
+  await page.getByRole("cell", { name: "Kai Chen" }).click();
+  await page.getByRole("button", { name: "Delete" }).first().click();
+
+  await page.getByRole("textbox", { name: "Filter users" }).click();
+  await page.getByRole("textbox", { name: "Filter users" }).fill("admin");
+  await page.getByRole("button", { name: "Submit" }).nth(1).click();
+
+  await page.getByRole("cell", { name: "Admin User" }).click();
+
+  await page.getByRole("link", { name: "Logout" }).click();
+  await page.getByRole("link", { name: "Login" }).click();
+  await page
+    .getByRole("textbox", { name: "Email address" })
+    .fill("admin@jwt.com");
+  await page.getByRole("textbox", { name: "Password" }).fill("admin");
+  await page.getByRole("button", { name: "Login" }).click();
+  await page.getByRole("link", { name: "Admin" }).click();
+  await expect(page.getByRole("cell", { name: "Kai Chen" })).toHaveCount(0);
 });
