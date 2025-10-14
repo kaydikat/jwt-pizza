@@ -128,6 +128,36 @@ test("franchisee login and dashboard", async ({ page }) => {
     .click();
 });
 
+test("franchisee creates store then deletes it", async ({ page }) => {
+  await basicInit(page);
+
+  await page.getByRole("link", { name: "Login" }).click();
+  await page.getByRole("textbox", { name: "Email address" }).fill("f@jwt.com");
+  await page.getByRole("textbox", { name: "Password" }).fill("franchisee");
+  await page.getByRole("button", { name: "Login" }).click();
+
+  await expect(page.getByRole("link", { name: "FU" })).toBeVisible();
+
+  await page
+    .getByLabel("Global")
+    .getByRole("link", { name: "Franchise" })
+    .click();
+
+  await page.getByRole("button", { name: "Create store" }).click();
+  await page.getByRole("textbox", { name: "store name" }).click();
+  await page.getByRole("textbox", { name: "store name" }).fill("store1");
+  await page.getByRole("button", { name: "Create" }).click();
+
+  await page.getByRole("cell", { name: "store1" }).click();
+
+  await page
+    .getByRole("row", { name: "store1 0 ₿ Close" })
+    .getByRole("button")
+    .click();
+  await page.getByRole("button", { name: "Close" }).click();
+  await expect(page.getByRole("cell", { name: "store1" })).toHaveCount(0);
+});
+
 test("about page", async ({ page }) => {
   await basicInit(page);
   await page.getByRole("link", { name: "About" }).click();
@@ -157,4 +187,37 @@ test("404 not found page", async ({ page }) => {
   await page.goto("/nonexistent-page");
 
   await page.getByText("Oops").click();
+});
+
+test("order pizza", async ({ page }) => {
+  await basicInit(page);
+  await page.getByRole("link", { name: "Login" }).click();
+  await page.getByRole("textbox", { name: "Email address" }).fill("d@jwt.com");
+  await page.getByRole("textbox", { name: "Password" }).fill("a");
+  await page.getByRole("button", { name: "Login" }).click();
+
+  await page.getByRole("button", { name: "Order now" }).click();
+  await page
+    .getByRole("link", { name: "Image Description Veggie A" })
+    .first()
+    .click();
+  await page.getByText("Awesome is a click away").click();
+  await page.getByRole("combobox").selectOption("4");
+  await page.getByRole("button", { name: "Checkout" }).click();
+
+  await page.getByRole("columnheader", { name: "Pie" }).click();
+  await page.locator("tbody").getByRole("cell", { name: "₿" }).click();
+  await page.getByText("So worth it").click();
+  await page.getByText("Send me that pizza right now!").click();
+  await page.getByRole("button", { name: "Pay now" }).click();
+
+  await page.getByRole("button", { name: "Verify" }).click();
+
+  await page.getByRole("button", { name: "Close" }).click();
+});
+
+test("home.tsx", async ({ page }) => {
+  await page.goto("/");
+
+  expect(await page.title()).toBe("JWT Pizza");
 });

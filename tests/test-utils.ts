@@ -24,7 +24,7 @@ export async function basicInit(page: Page) {
       name: "Franchisee User",
       email: "f@jwt.com",
       password: "franchisee",
-      roles: [{ role: Role.Franchisee }],
+      roles: [{ role: Role.Franchisee, objectId: "LotaPizza" }],
     },
   };
 
@@ -260,12 +260,18 @@ export async function basicInit(page: Page) {
       mockFranchises = mockFranchises.filter((f) => f.id !== franchiseId);
       await route.fulfill({ json: { message: "franchise deleted" } });
     } else if (method === "GET") {
-      // Get specific franchise details
-      const franchise = mockFranchises.find((f) => f.id === franchiseId);
-      if (franchise) {
-        await route.fulfill({ json: franchise });
+      // Get franchises for a specific user ID
+      const userId = franchiseId.toString();
+      const user = Object.values(validUsers).find((u) => u.id === userId);
+      
+      if (user && user.roles?.some((r) => r.role === Role.Franchisee)) {
+        // Return franchises that this user is an admin of
+        const userFranchises = mockFranchises.filter((f) =>
+          f.admins?.some((admin) => admin.email === user.email)
+        );
+        await route.fulfill({ json: userFranchises });
       } else {
-        await route.fulfill({ status: 404 });
+        await route.fulfill({ json: [] });
       }
     }
   });
