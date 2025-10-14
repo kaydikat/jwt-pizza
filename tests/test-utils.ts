@@ -117,9 +117,36 @@ export async function basicInit(page: Page) {
 
       const updateRes = {
         user: { ...loggedInUser, password: undefined },
-        token: "abcdef", // Return same token for simplicity
+        token: "abcdef",
       };
       await route.fulfill({ json: updateRes });
+    } else if (method === "DELETE") {
+      const userId = route
+        .request()
+        .url()
+        .match(/\/api\/user\/(\d+)$/)?.[1];
+      // Find and remove the user from validUsers
+      const userToDelete = Object.values(validUsers).find(
+        (user) => user.id === userId
+      );
+      if (userToDelete && userToDelete.email) {
+        // Remove user from validUsers by email
+        if (validUsers[userToDelete.email]) {
+          delete validUsers[userToDelete.email];
+        }
+        // Clear logged-in user if they are deleted
+        if (loggedInUser?.id === userId) {
+          loggedInUser = undefined;
+        }
+        await route.fulfill({ json: { message: "user deleted" } });
+      } else {
+        await route.fulfill({ status: 404, json: { error: "User not found" } });
+      }
+    } else {
+      await route.fulfill({
+        status: 405,
+        json: { error: "Method Not Allowed" },
+      });
     }
   });
 
@@ -341,7 +368,7 @@ export async function basicInit(page: Page) {
       // Filter users by name if provided (supporting wildcard *)
       if (name !== "*") {
         const regex = new RegExp(name.replace(/\*/g, ".*"), "i");
-        users = users.filter((user) => regex.test(user.name));
+        users = users.filter((user) => user.name && regex.test(user.name));
       }
 
       // Apply pagination

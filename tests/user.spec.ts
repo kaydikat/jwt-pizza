@@ -18,7 +18,7 @@ test("updateUserName", async ({ page }) => {
   await expect(page.locator("h3")).toContainText("Edit user");
   await page.getByRole("button", { name: "Update" }).click();
 
-  await page.waitForSelector('[role="dialog"].hidden', { state: "attached" });
+  await expect(page.getByRole("button", { name: "Edit" })).toBeVisible();
 
   await expect(page.getByRole("main")).toContainText("pizza diner");
 
@@ -27,7 +27,7 @@ test("updateUserName", async ({ page }) => {
   await page.getByRole("textbox").first().fill("pizza dinerx");
   await page.getByRole("button", { name: "Update" }).click();
 
-  await page.waitForSelector('[role="dialog"].hidden', { state: "attached" });
+  await expect(page.getByRole("button", { name: "Edit" })).toBeVisible();
 
   await expect(page.getByRole("main")).toContainText("pizza dinerx");
 
@@ -60,7 +60,7 @@ test("updateUser email and password", async ({ page }) => {
   await expect(page.locator("h3")).toContainText("Edit user");
   await page.getByRole("button", { name: "Update" }).click();
 
-  await page.waitForSelector('[role="dialog"].hidden', { state: "attached" });
+  await expect(page.getByRole("button", { name: "Edit" })).toBeVisible();
 
   await expect(page.getByRole("main")).toContainText("pizza diner");
 
@@ -72,7 +72,7 @@ test("updateUser email and password", async ({ page }) => {
   await page.locator("#password").fill("newpassword");
   await page.getByRole("button", { name: "Update" }).click();
 
-  await page.waitForSelector('[role="dialog"].hidden', { state: "attached" });
+  await expect(page.getByRole("button", { name: "Edit" })).toBeVisible();
 
   await expect(page.getByRole("main")).toContainText("pizza diner");
 
@@ -85,9 +85,10 @@ test("updateUser email and password", async ({ page }) => {
   await page.getByRole("textbox", { name: "Password" }).fill("newpassword");
   await page.getByRole("button", { name: "Login" }).click();
 
+  await expect(page.getByRole("link", { name: "pd" })).toBeVisible();
   await page.getByRole("link", { name: "pd" }).click();
 
-  await expect(page.getByRole("main")).toContainText("pizza dinerx");
+  await expect(page.getByRole("main")).toContainText("pizza diner");
 });
 
 test("updateAdmin", async ({ page }) => {
@@ -112,7 +113,6 @@ test("updateAdmin", async ({ page }) => {
   await page.locator("#password").fill("adminx");
   await page.getByRole("button", { name: "Update" }).click();
 
-  await page.waitForSelector('[role="dialog"].hidden', { state: "attached" });
   await expect(page.getByRole("link", { name: "AU" })).toBeVisible();
   await expect(page.getByRole("main")).toContainText("Admin Userx");
   await page.getByRole("link", { name: "Logout" }).click();
@@ -145,7 +145,6 @@ test("updateFranchisee", async ({ page }) => {
   await page.locator("#password").fill("franchiseex");
   await page.getByRole("button", { name: "Update" }).click();
 
-  await page.waitForSelector('[role="dialog"].hidden', { state: "attached" });
   await expect(page.getByRole("link", { name: "FU" })).toBeVisible();
   await expect(page.getByRole("main")).toContainText("Franchisee Userx");
   await page.getByRole("link", { name: "Logout" }).click();
@@ -165,7 +164,6 @@ test("admin checks if user list has users, deletes, and filters", async ({
 }) => {
   await basicInit(page);
 
-  // Login as admin
   await page.getByRole("link", { name: "Login" }).click();
   await page
     .getByRole("textbox", { name: "Email address" })
@@ -176,10 +174,14 @@ test("admin checks if user list has users, deletes, and filters", async ({
   await page.getByRole("link", { name: "Admin" }).click();
 
   await page.getByRole("cell", { name: "Kai Chen" }).click();
+
   await page.getByRole("button", { name: "Delete" }).first().click();
+
+  await expect(page.getByRole("cell", { name: "Kai Chen" })).toHaveCount(0);
 
   await page.getByRole("textbox", { name: "Filter users" }).click();
   await page.getByRole("textbox", { name: "Filter users" }).fill("admin");
+
   await page.getByRole("button", { name: "Submit" }).nth(1).click();
 
   await page.getByRole("cell", { name: "Admin User" }).click();
@@ -192,5 +194,6 @@ test("admin checks if user list has users, deletes, and filters", async ({
   await page.getByRole("textbox", { name: "Password" }).fill("admin");
   await page.getByRole("button", { name: "Login" }).click();
   await page.getByRole("link", { name: "Admin" }).click();
+
   await expect(page.getByRole("cell", { name: "Kai Chen" })).toHaveCount(0);
 });

@@ -108,7 +108,8 @@ test("admin creates and filters franchise", async ({ page }) => {
   await page
     .getByRole("textbox", { name: "Filter franchises" })
     .fill("franchise");
-  await page.getByRole("button", { name: "Submit" }).click();
+
+  await page.getByRole("button", { name: "Submit" }).first().click();
 });
 
 test("franchisee login and dashboard", async ({ page }) => {
