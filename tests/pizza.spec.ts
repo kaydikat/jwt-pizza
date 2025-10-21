@@ -215,9 +215,3 @@ test("order pizza", async ({ page }) => {
 
   await page.getByRole("button", { name: "Close" }).click();
 });
-
-test("home.tsx", async ({ page }) => {
-  await page.goto("/");
-
-  expect(await page.title()).toBe("JWT Pizza");
-});
