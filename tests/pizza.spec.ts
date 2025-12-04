@@ -4,7 +4,7 @@ import { basicInit } from "./test-utils";
 test("home page", async ({ page }) => {
   await page.goto("/");
 
-  expect(await page.title()).toBe("JWT Pizza");
+  expect(await page.title()).toBe("JWT Pizza Official");
 });
 
 test("register", async ({ page }) => {
