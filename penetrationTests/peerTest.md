@@ -1,7 +1,6 @@
 ## Peer Test - Adam Harris and Kaydance Turner
 
 ### Self Attack - Adam Harris
-
 I found that my pizza service was vulnerable in several ways:
 
  **Password Brute Force**
@@ -32,9 +31,9 @@ I found that my pizza service was vulnerable in several ways:
 
 *Description*: CORS does not work. I was able to login from a different origin. The response included `access-control-allow-credentials: true` and `access-control-allow-origin: <the invalid origin I used>`.
 
-*Correction*: Fix CORS; only allow https://pizza.kaydanceturner.click and local dev
+*Correction*: Fix CORS; only allow https://pizza.adammharris.me
 
-![Bad request origin](./kaydanceturner-cors.png)
+![Misconfigured CORS image](./adammharris-cors.png)
 
 
 **HTTP Request interception**
@@ -54,6 +53,9 @@ I found that my pizza service was vulnerable in several ways:
 ![Injection image](./adammarris-injection.png)
 
 ### Self Attack - Kaydance Turner
+
+**Password Brute Force**
+
 *Date*: 2025-12-04
 
 *Target*: https://pizza-service.kaydanceturner.click
@@ -69,6 +71,7 @@ I found that my pizza service was vulnerable in several ways:
 ![Brute Force image (after fix)](./kaydanceturner-bruteforce.png)
 
 **Misconfigured CORS**
+
 *Date*: 2025-12-04
 
 *Target*: https://pizza-service.kaydanceturner.click
@@ -83,32 +86,21 @@ I found that my pizza service was vulnerable in several ways:
 
 ![Brute Force image (after fix)](./kaydanceturner-bruteforce.png)
 
-Allow requests from evil site
-- Penetration Steps
-    1. Go to proxy -> intercept
-    2. enable intercept
-    3. login with password
-    4. in burp suite, forward options request
-    5. in PUT request, modify Origin to be https://pizza.evil-site.click
-    6. press forward again
-    7. turn off intercept
-- Result
-    - Login still works, but now that request is coming from a bad site
-- Fix
-    - Create a whitelist of websites which are allowed to access my api
+**HTTP Request interception**
 
-Change Pizza Order price
-- Penetration Steps
-    1. Login and Order Pizza but stop at "Pay now"
-    2. Turn intercept on
-    3. Click "pay now"
-    4. Forward options request
-    5. in PUT order reqest, change price to .0000001
-    6. Forward request and turn off intercept.
-- Results
-    - I just got away with paying .000001 for a pizza
-- Fix
-    - In server code, make so you can only pay required price for pizza.
+*Date*: 2025-12-04
+
+*Target*: https://pizza-service.adammharris.me
+
+*Classification*: Injection
+
+*Severity*: 3 (High)
+
+*Description*: Using Burp Suite, I can buy a pizza for 0 BTC via HTTP request interception. The service does not double check the price.
+
+*Correction*: Don't send the price as part of the request at all—prices should be read-only.
+
+![Injection image](./kaydanceturner-injection.png)
 
 ### Peer Attack - Adam Harris
 
@@ -134,11 +126,17 @@ With the proper origin (`https://pizza.kaydanceturner.click`) it worked correctl
 I also tried to brute force a password and discovered a quirk in Burp Suite: it behaves strangely with `#` characters. There did not seem to be rate limits, so:
 
 **Password Brute Force**
+
 *Date*: 2025-12-04
+
 *Target*: https://pizza-service.kaydanceturner.click
+
 *Classification*: Identification and Authentication Failures
+
 *Severity*: 3 (High)
+
 *Description*: The pizza service's rate limits are lacking. I can send 100+ requests in a short time period, making password brute forces relatively simple. The admin account a@jwt.com has a relatively simple password.
+
 *Correction*: Introduce rate limits. Change to a stronger password.
 
 I tested request interception by attempting to purchase a pizza for 0 BTC, but it didn't work. So that is good security!
@@ -147,19 +145,47 @@ Overall, the main recommendations I can make are rate limits and changing to a s
 
 ### Peer Attack - Kaydance Turner
 
-bruteforce password
-- Penetration Steps - I typed in "admin" for the password to a@jwt.com and got in. He forgot to change his password!
-- Result - I can now remove all of the franchisess and completely ruin his business.
-- Fix - He should change his admin password to something more difficult to guess
+**Password Brute Force**
 
-Change pizza order price
-- Penetration Steps - I intercepted the pizza order request in burp suite and replaced the price with .000001 bitcoin.
-- Result - I can now buy his pizza for super cheap
-- Fix - compare price to original price to make sure it wasn't changed
+*Date*: 2025-12-04
 
-Sending request from bad site
-- I used curl to send `curl -v -H "Origin: https://evil.com" https://pizza-service.adammharris.me` to his site and got a 200 response back. However, this didn't work for everything. When I sent a bad requests to /api/menu/order, it didn't allow give me a response.
+*Target*: https://pizza-service.adammharris.me
 
+*Classification*: Identification and Authentication Failures
+
+*Severity*: 3 (High)
+
+*Description*: I typed in "admin" for the password to a@jwt.com and got in. He forgot to change his password! I can now remove all of the franchisess and completely ruin his business.
+
+*Correction*: He should change his admin password to something more difficult to guess.
+
+**HTTP Request interception**
+
+*Date*: 2025-12-04
+
+*Target*: https://pizza-service.adammharris.me
+
+*Classification*: Injection
+
+*Severity*: 3 (High)
+
+*Description*: I intercepted the pizza order request in burp suite and replaced the price with .000001 bitcoin. I can now buy his pizza for super cheap.
+
+*Correction*: Don't send the price as part of the request at all—prices should be read-only.
+
+**Misconfigured CORS**
+
+*Date*: 2025-12-04
+
+*Target*: https://pizza-service.kaydanceturner.click
+
+*Classification*: Broken Access Control
+
+*Severity*: 2 (Medium)
+
+*Description*: I used curl to send `curl -v -H "Origin: https://evil.com" https://pizza-service.adammharris.me` to his site and got a 200 response back. However, this didn't work for everything. When I sent a bad requests to /api/menu/order, it didn't allow give me a response.
+
+*Correction*: Create a whitelist of websites which are allowed to access his api.
 ### Summary
 
 We were both able to penetrate each others websites with curl requests from unknown sites and were also able to figure out each other's admin passwords. This shows that we still had much more to do to be able to fully harden our websites. Considering how we were able to penetrate each other's websites, and we're just simple CS students, it just shows how important it is to put time and effort into keeping our site secure against attackers.
