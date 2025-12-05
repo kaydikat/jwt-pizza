@@ -82,9 +82,9 @@ I found that my pizza service was vulnerable in several ways:
 
 *Description*: Currently any website can access my api. I tested this using `curl -v -H "Origin: https://evil.com" https://pizza-service.kaydanceturner.click` and I got a 200 response back.
 
-*Correction*: Create a whitelist of websites which are allowed to access my api.
+*Correction*: Create a whitelist of websites which are allowed to access my api; only allow https://pizza.kaydanceturner.click and local dev.
 
-![Brute Force image (after fix)](./kaydanceturner-bruteforce.png)
+![Bad request origin](./kaydanceturner-cors.png)
 
 **HTTP Request interception**
 
@@ -177,7 +177,7 @@ Overall, the main recommendations I can make are rate limits and changing to a s
 
 *Date*: 2025-12-04
 
-*Target*: https://pizza-service.kaydanceturner.click
+*Target*: https://pizza-service.adammharris.me
 
 *Classification*: Broken Access Control
 
@@ -186,6 +186,7 @@ Overall, the main recommendations I can make are rate limits and changing to a s
 *Description*: I used curl to send `curl -v -H "Origin: https://evil.com" https://pizza-service.adammharris.me` to his site and got a 200 response back. However, this didn't work for everything. When I sent a bad requests to /api/menu/order, it didn't allow give me a response.
 
 *Correction*: Create a whitelist of websites which are allowed to access his api.
+
 ### Summary
 
 We were both able to penetrate each others websites with curl requests from unknown sites and were also able to figure out each other's admin passwords. This shows that we still had much more to do to be able to fully harden our websites. Considering how we were able to penetrate each other's websites, and we're just simple CS students, it just shows how important it is to put time and effort into keeping our site secure against attackers.
